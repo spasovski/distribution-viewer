@@ -16,12 +16,13 @@ module.exports = {
   devtool: '#source-map',
   plugins: [
     environmentVariables,
+    /* TODO: Bring this back based on ENV.
     new webpack.optimize.UglifyJsPlugin({
       comments: false,
       compress: {
         warnings: false
       }
-    }),
+    }), */
   ],
   module: {
     loaders: [

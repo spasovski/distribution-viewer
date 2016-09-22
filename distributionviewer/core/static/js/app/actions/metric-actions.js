@@ -21,10 +21,17 @@ export function getMetricsFailure(status) {
   };
 }
 
-export function getMetricSuccess(item) {
+export function gettingMetric() {
+  return {
+    type: types.GETTING_METRIC
+  };
+}
+
+export function getMetricSuccess(item, points) {
   return {
     type: types.GET_METRIC_SUCCESS,
-    item
+    item,
+    points,
   };
 }
 

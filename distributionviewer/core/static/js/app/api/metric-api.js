@@ -1,8 +1,11 @@
 import axios from 'axios';
+
 import store from '../store';
 import {
-  gettingMetrics, getMetricsSuccess, getMetricsFailure
+  gettingMetrics, getMetricsSuccess, getMetricsFailure,
+  gettingMetric, getMetricSuccess, getMetricFailure
 } from '../actions/metric-actions';
+
 
 const prodEndpoints = {
   GET_METRICS: `${location.origin}/metrics/`,
@@ -26,6 +29,20 @@ export function getMetrics() {
   }).catch(response => {
     console.error(response);
     store.dispatch(getMetricsFailure(response.status));
+    return response;
+  });
+}
+
+export function getMetric(metricId) {
+  store.dispatch(gettingMetric());
+  console.log('getting:', metricId);
+
+  return axios.get(endpoints.GET_METRIC + metricId).then(response => {
+    store.dispatch(getMetricSuccess(response.data, response.data.points));
+    return response;
+  }).catch(response => {
+    console.error(response);
+    store.dispatch(getMetricFailure(response.status));
     return response;
   });
 }
