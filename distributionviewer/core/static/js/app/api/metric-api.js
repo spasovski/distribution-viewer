@@ -3,7 +3,7 @@ import axios from 'axios';
 import store from '../store';
 import {
   gettingMetrics, getMetricsSuccess, getMetricsFailure,
-  gettingMetric, getMetricSuccess, getMetricFailure
+  gettingMetricData, getMetricDataSuccess, getMetricDataFailure
 } from '../actions/metric-actions';
 
 
@@ -17,6 +17,7 @@ const mockEndpoints = {
   GET_METRIC: 'http://localhost:3009/'
 };
 
+// TODO: Probably won't need an export here.
 export const endpoints = process.env.NODE_ENV === 'production' ? prodEndpoints : mockEndpoints;
 
 // Fetch list of metrics.
@@ -25,6 +26,7 @@ export function getMetrics() {
 
   return axios.get(endpoints.GET_METRICS).then(response => {
     store.dispatch(getMetricsSuccess(response.data.metrics));
+    getMetricData(response.data.metrics);
     return response;
   }).catch(response => {
     console.error(response);
@@ -33,16 +35,19 @@ export function getMetrics() {
   });
 }
 
-export function getMetric(metricId) {
-  store.dispatch(gettingMetric());
-  console.log('getting:', metricId);
+const getMetricData = (metrics) => {
+  let metricData = [];
+  store.dispatch(gettingMetricData());
 
-  return axios.get(endpoints.GET_METRIC + metricId).then(response => {
-    store.dispatch(getMetricSuccess(response.data, response.data.points));
-    return response;
-  }).catch(response => {
-    console.error(response);
-    store.dispatch(getMetricFailure(response.status));
-    return response;
+  metrics.map(metric => {
+    axios.get(endpoints.GET_METRIC + metric.id).then(response => {
+      metricData[metric.id] = response.data.points;
+      console.log(`adding ${metric.id}: ${response.data.points}`);
+    }).catch(response => {
+      console.error(response);
+      store.dispatch(getMetricDataFailure(response.status));
+    });
   });
+
+  store.dispatch(getMetricDataSuccess(metricData));
 }

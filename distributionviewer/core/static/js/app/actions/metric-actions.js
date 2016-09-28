@@ -21,23 +21,22 @@ export function getMetricsFailure(status) {
   };
 }
 
-export function gettingMetric() {
+export function gettingMetricData() {
   return {
-    type: types.GETTING_METRIC
+    type: types.GETTING_METRIC_DATA
   };
 }
 
-export function getMetricSuccess(item, points) {
+export function getMetricDataSuccess(metricData) {
   return {
-    type: types.GET_METRIC_SUCCESS,
-    item,
-    points,
+    type: types.GET_METRIC_DATA_SUCCESS,
+    metricData
   };
 }
 
-export function getMetricFailure(status) {
+export function getMetricDataFailure(status) {
   return {
-    type: types.GET_METRIC_FAILURE,
+    type: types.GET_METRIC_DATA_FAILURE,
     status
   };
 }

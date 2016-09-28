@@ -14,9 +14,25 @@ const initialState = {
   isFetching: false,
   item: {},
   items: [],
-  points,
+  metricData: [],
+  gotData: false,
   status: 200
 };
+
+const buildPointsMeta = (dataPoints) => {
+  let pointsMeta = [];
+
+  for (let i = 0; i < dataPoints.length; i++) {
+    pointsMeta.push({
+      x: dataPoints[i]['refRank'] || parseFloat(dataPoints[i]['b']),
+      y: dataPoints[i]['c'] * 100,
+      p: dataPoints[i]['p'] * 100,
+      label: dataPoints[i]['b']
+    });
+  }
+
+  return pointsMeta;
+}
 
 const metricReducer = function(state = initialState, action) {
   switch(action.type) {
@@ -27,11 +43,13 @@ const metricReducer = function(state = initialState, action) {
     case types.GET_METRICS_FAILURE:
       return Object.assign({}, state, {isFetching: false, status: action.status});
 
-    case types.GETTING_METRIC:
+    case types.GETTING_METRIC_DATA:
       return Object.assign({}, state, {isFetching: true});
-    case types.GET_METRIC_SUCCESS:
-      return Object.assign({}, state, {isFetching: false, item: action.item, points: action.points});
-    case types.GET_METRIC_FAILURE:
+    case types.GET_METRIC_DATA_SUCCESS:
+      //let myPoints = buildPointsMeta(action.metricData);
+      console.log('reducer metricData:', action.metricData);
+      return Object.assign({}, state, {isFetching: false, metricData: action.metricData, gotData: true});
+    case types.GET_METRIC_DATA_FAILURE:
       return Object.assign({}, state, {isFetching: false, status: action.status});
   }
 

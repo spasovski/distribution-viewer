@@ -2,9 +2,14 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import { ChartMenu } from '../views/chart-menu';
+import * as metricApi from '../../api/metric-api';
 
 
 class ChartMenuContainer extends React.Component {
+  componentDidMount() {
+    metricApi.getMetrics();
+  }
+
   render() {
     return (
       <ChartMenu items={this.props.items} />

@@ -2,8 +2,9 @@ import React from 'react';
 import * as d3Scale from 'd3-scale';
 import * as d3Array from 'd3-array';
 import axios from 'axios';
+import {connect} from 'react-redux';
 
-import { ChartAxisContainer } from './chart-axis-container';
+import ChartAxisContainer from './chart-axis-container';
 import ChartLineContainer from './chart-line-container';
 import * as metricApi from '../../api/metric-api';
 import store from '../../store';
@@ -32,36 +33,73 @@ var dataset = [
   {x: 15, y: 38},
 ];
 
-export default class ChartContainer extends React.Component {
+//<ChartLineContainer chartId={this.props.chartId} xScale={this.xScale} yScale={this.yScale} data={this.data} />
+
+class ChartContainer extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.data = [];
+    this.margin = {top: 20, right: 20, bottom: 30, left: 40},
+    this.width = 300 - this.margin.left - this.margin.right,
+    this.height = 250 - this.margin.top - this.margin.bottom;
+  }
+
+  buildPointsMeta(dataPoints) {
+    let pointsMeta = [];
+
+    if (dataPoints) {
+      for (let i = 0; i < dataPoints.length; i++) {
+        pointsMeta.push({
+          x: dataPoints[i]['refRank'] || parseFloat(dataPoints[i]['b']),
+          y: dataPoints[i]['c'] * 100,
+          p: dataPoints[i]['p'] * 100,
+          label: dataPoints[i]['b']
+        });
+      }
+    }
+
+    return pointsMeta;
+  }
+
+  componentDidUpdate() {
+    this.data = this.buildPointsMeta(this.props.metricData[this.props.chartId]);
+    console.log('built data is:', this.data);
+
+    this.xScale = d3Scale.scaleLinear()
+                  .domain([0, d3Array.max(this.data, d => d.x)])
+                  .range([0, this.width]);
+
+    this.yScale = d3Scale.scaleLinear()
+                  .domain([0, d3Array.max(this.data, d => d.y)])
+                  .range([this.height, 0]);
+    console.log('store state:', store.getState());
+  }
+
   render() {
-    let margin = {top: 20, right: 20, bottom: 30, left: 40},
-        width = 300 - margin.left - margin.right,
-        height = 250 - margin.top - margin.bottom;
-
-    let data = dataset;
-
-    let xScale = d3Scale.scaleLinear()
-                  .domain([0, d3Array.max(data, d => d.x)])
-                  .range([0, width]);
-
-    let yScale = d3Scale.scaleLinear()
-                  .domain([0, d3Array.max(data, d => d.y)])
-                  .range([height, 0]);
-
     return (
       <div className={`chart chart-${this.props.chartId}`}>
-        <svg width={width + margin.left + margin.right}
-             height={height + margin.top + margin.bottom}>
-          <g transform={`translate(${margin.left}, ${margin.top})`}>
-            <ChartAxisContainer chartId={this.props.chartId} axisType="x" scale={xScale} size={height} />
-            <ChartAxisContainer chartId={this.props.chartId} axisType="y" scale={yScale} size={width} />
-            <ChartLineContainer chartId={this.props.chartId} xScale={xScale} yScale={yScale} data={data} />
+        <svg width={this.width + this.margin.left + this.margin.right}
+             height={this.height + this.margin.top + this.margin.bottom}>
+          <g transform={`translate(${this.margin.left}, ${this.margin.top})`}>
+            <ChartAxisContainer chartId={this.props.chartId} scale={this.props.xScale} axisType="x" size={this.height} />
+            <ChartAxisContainer chartId={this.props.chartId} scale={this.props.yScale} axisType="y" size={this.width} />
+            <ChartLineContainer chartId={this.props.chartId} xScale={this.xScale} yScale={this.yScale} data={this.data} />
           </g>
         </svg>
       </div>
     );
   }
 }
+
+const mapStateToProps = function(store) {
+  return {
+    gotData: store.metricState.gotData,
+    metricData: store.metricState.metricData
+  };
+};
+
+export default connect(mapStateToProps)(ChartContainer);
 
 /*
 ChartContainer.propTypes = {

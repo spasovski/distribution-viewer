@@ -5,10 +5,16 @@ import * as d3Selection from 'd3-selection';
 import ChartAxis from '../views/chart-axis';
 
 
-export class ChartAxisContainer extends React.Component {
-  componentDidMount() {
+export default class ChartAxisContainer extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  componentWillUpdate() {
     let props = this.props;
     let axisGenerator = props.axisType === 'x' ? d3Axis.axisBottom : d3Axis.axisLeft;
+
+    if (!props.scale) return;
 
     let axis = axisGenerator(props.scale)
                 .tickSizeInner(-props.size)
